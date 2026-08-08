@@ -805,8 +805,10 @@ write_site() {
     local domain="$1" content="$2"
     if [ -w "$SITES_AVAILABLE" ]; then
         printf '%s\n' "$content" > "$SITES_AVAILABLE/$domain"
+        chmod 644 "$SITES_AVAILABLE/$domain" 2>/dev/null || true
     else
         printf '%s\n' "$content" | run_root tee "$SITES_AVAILABLE/$domain" >/dev/null
+        run_root chmod 644 "$SITES_AVAILABLE/$domain" 2>/dev/null || true
     fi
     [ -w "$SITES_ENABLED" ] && ln -sf "$SITES_AVAILABLE/$domain" "$SITES_ENABLED/$domain" \
         || run_root ln -sf "$SITES_AVAILABLE/$domain" "$SITES_ENABLED/$domain"
@@ -929,11 +931,11 @@ cmd_list() {
             [ -f "$conf" ] || continue
             local dom root backend port
             dom=$(basename "$conf")
-            root=$(grep -m1 '^\s*root ' "$conf" | sed 's/.*root //; s/;//')
-            if grep -q 'proxy_pass http://127.0.0.1:8080' "$conf"; then
+            root=$(grep -m1 '^\s*root ' "$conf" 2>/dev/null | sed 's/.*root //; s/;//')
+            if grep -q 'proxy_pass http://127.0.0.1:8080' "$conf" 2>/dev/null; then
                 backend="roadrunner"; port="8080"
             else
-                backend="fpm"; port=$(grep -m1 'fastcgi_pass' "$conf" | grep -oE '127\.0\.0\.1:[0-9]+' | cut -d: -f2)
+                backend="fpm"; port=$(grep -m1 'fastcgi_pass' "$conf" 2>/dev/null | grep -oE '127\.0\.0\.1:[0-9]+' | cut -d: -f2)
                 port="${port:-9000}"
             fi
             local st="disabled"
@@ -952,11 +954,11 @@ cmd_list() {
         [ -f "$conf" ] || continue
         local dom root backend port st
         dom=$(basename "$conf")
-        root=$(grep -m1 '^\s*root ' "$conf" | sed 's/.*root //; s/;//')
-        if grep -q 'proxy_pass http://127.0.0.1:8080' "$conf"; then
+        root=$(grep -m1 '^\s*root ' "$conf" 2>/dev/null | sed 's/.*root //; s/;//')
+        if grep -q 'proxy_pass http://127.0.0.1:8080' "$conf" 2>/dev/null; then
             backend="roadrunner"; port="8080"
         else
-            backend="fpm"; port=$(grep -m1 'fastcgi_pass' "$conf" | grep -oE '127\.0\.0\.1:[0-9]+' | cut -d: -f2)
+            backend="fpm"; port=$(grep -m1 'fastcgi_pass' "$conf" 2>/dev/null | grep -oE '127\.0\.0\.1:[0-9]+' | cut -d: -f2)
             port="${port:-9000}"
         fi
         if [ -L "$SITES_ENABLED/$dom" ]; then st="✅ habilitado"; else st="❌ deshabilitado"; fi
@@ -1037,7 +1039,7 @@ interactive() {
                 [ -f "$conf" ] || continue
                 local dom root st
                 dom=$(basename "$conf")
-                root=$(grep -m1 '^\s*root ' "$conf" | sed 's/.*root //; s/;//')
+                root=$(grep -m1 '^\s*root ' "$conf" 2>/dev/null | sed 's/.*root //; s/;//')
                 if [ -L "$SITES_ENABLED/$dom" ]; then st="✅"; else st="❌"; fi
                 say "   [$i] $st $dom → $root"
                 ((i++))
@@ -3360,6 +3362,7 @@ server {
 }
 NGINX
         run --sudo ln -sf /etc/nginx/sites-available/bearwsl.test /etc/nginx/sites-enabled/bearwsl.test
+        run --sudo chmod 644 /etc/nginx/sites-available/bearwsl.test
     fi
     if [ "$DO_PANEL" = "1" ] && [ ! -f /etc/nginx/sites-available/panel.bearwsl.test ]; then
         run --sudo tee /etc/nginx/sites-available/panel.bearwsl.test >/dev/null <<'NGINX'
@@ -3376,6 +3379,7 @@ server {
 }
 NGINX
         run --sudo ln -sf /etc/nginx/sites-available/panel.bearwsl.test /etc/nginx/sites-enabled/panel.bearwsl.test
+        run --sudo chmod 644 /etc/nginx/sites-available/panel.bearwsl.test
     fi
     if run --sudo nginx -t; then
         run --sudo systemctl reload nginx 2>/dev/null || run --sudo nginx -s reload || true
@@ -3416,6 +3420,7 @@ fi
 {
     echo "# bearwsl: vhosts, nginx, panel y servicios nativos sin contraseña"
     echo "$USER ALL=(root) NOPASSWD: $BEARWSL_DIR/vhost.sh, /usr/sbin/nginx -t, /usr/bin/nginx -t, /usr/bin/systemctl reload nginx, /usr/sbin/systemctl reload nginx, /usr/bin/systemctl restart nginx, /usr/sbin/systemctl restart nginx, /usr/bin/systemctl start bearwsl-panel, /usr/sbin/systemctl start bearwsl-panel, /usr/bin/systemctl stop bearwsl-panel, /usr/sbin/systemctl stop bearwsl-panel, /usr/bin/systemctl restart bearwsl-panel, /usr/sbin/systemctl restart bearwsl-panel"
+    echo "$USER ALL=(root) NOPASSWD: /usr/bin/tee /etc/nginx/sites-available/*, /usr/bin/ln -sf /etc/nginx/sites-available/* /etc/nginx/sites-enabled/*, /usr/bin/rm -f /etc/nginx/sites-available/*, /usr/bin/rm -f /etc/nginx/sites-enabled/*, /usr/bin/mkdir -p /var/www/*, /usr/bin/chmod 644 /etc/nginx/sites-available/*, /usr/bin/chmod 2775 /var/www/*, /usr/bin/chgrp www-data /var/www/*"
     if [ -n "$SUDOERS_EXTRA" ]; then
         echo "$USER ALL=(root) NOPASSWD: ${SUDOERS_EXTRA#, }"
     fi
