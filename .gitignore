@@ -1,0 +1,7 @@
+# Archivos sensibles del panel (nunca subir tokens)
+.env
+webpanel/panel_token
+
+# Archivos temporales
+*.log
+/tmp/
