@@ -51,9 +51,13 @@ systemd=true
 
 ## 📸 Capturas
 
-| Panel web (vista principal) | Panel web (vista completa) |
+| Acceso (solicitud de token) | Panel web autenticado |
 |:---:|:---:|
-| ![Panel BEARWSL](docs/panel-overview.png) | ![Panel BEARWSL completo](docs/panel-full.png) |
+| ![Solicitud de token](docs/panel-login.png) | ![Panel BEARWSL](docs/panel-overview.png) |
+
+| Panel web autenticado (vista completa) |
+|:---:|
+| ![Panel BEARWSL completo](docs/panel-full.png) |
 
 ---
 
@@ -109,7 +113,23 @@ vhost.sh crear api.test api fpm|roadrunner   # Crear un vhost *.test
 
 - **URL**: `http://panel.bearwsl.test:8088` (o `http://127.0.0.1:8088`)
 - Estado en vivo de los 10 servicios, botones de control y creación de vhosts.
-- El token del panel se muestra al final de la instalación y también vive en `~/.config/bearwsl/panel_token`.
+
+#### 🔑 El panel pide un token para entrar
+
+El panel está protegido: al abrirlo por primera vez te pedirá un **token de acceso**. Puedes obtenerlo de dos formas:
+
+1. Se muestra al final de la instalación (línea *Token panel*).
+2. Está guardado en `~/.config/bearwsl/panel_token`:
+
+   ```bash
+   cat ~/.config/bearwsl/panel_token
+   ```
+
+Introduce el token en la pantalla de acceso y la sesión quedará abierta en tu navegador. También puedes entrar directamente con el token en la URL:
+
+```
+http://panel.bearwsl.test:8088/?token=<tu-token>
+```
 
 ### Proyectos
 

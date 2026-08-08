@@ -1879,6 +1879,8 @@ _BEOF_STYLE
 
   /* ---------------- fetch wrapper ---------------- */
   async function api(path, opts = {}) {
+    const q = new URLSearchParams(location.search).get('token');
+    if (q) path += (path.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(q);
     const res = await fetch(path, {
       headers: { 'Content-Type': 'application/json' },
       ...opts,
