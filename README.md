@@ -183,6 +183,10 @@ Inspirado en [**BearSAMPP**](https://bearsampp.com/) — un stack portátil WAMP
 
 ---
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X7L625HLNR)
+
+---
+
 ## 📄 Licencia
 
 [MIT](LICENSE) © 2026 Keno
